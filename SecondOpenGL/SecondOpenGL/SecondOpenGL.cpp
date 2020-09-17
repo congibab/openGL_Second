@@ -1,10 +1,13 @@
-﻿// SecondOpenGL.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
-//
+﻿#include <glad/glad.h>
+#include <gl/freeglut.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 
+#pragma comment(lib, "freeglut.lib")
+
 int main()
 {
-    std::cout << "Hello World!\n";
 }
 
