@@ -10,6 +10,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "GameTime.h"
 
 using namespace std;
 
@@ -25,6 +26,13 @@ const unsigned int SCR_HEIGHT = 600;
 float mixValue = 0.2f;
 float zoom = -3.0f;
 float DeltaTime = 0;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+GameTime gametime;
+
 
 int main(void)
 {
@@ -57,10 +65,10 @@ int main(void)
 	}
 	//==========================
 
-
 	Shader defaultShader("Shader/shader.vs","Shader/shader.fs");
 	Shader MVP_Shader("Shader/MVP_Shader.vs","Shader/shader.fs");
-
+	
+	//==========================
 	//float vertices[] = 
 	//{ 
 	//	 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
@@ -193,7 +201,7 @@ int main(void)
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		gametime.Time_Measure();
 		MVP_Shader.use();
 
 		glActiveTexture(GL_TEXTURE0);
@@ -202,12 +210,18 @@ int main(void)
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 view;
 		glm::mat4 projection;
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 		
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		view = glm::rotate(view, (float)glfwGetTime() * glm::radians(45.0f), glm::vec3(0.1f, 0.1f, 0.0f));
+		//float camX = sin(glfwGetTime()) * 10.0f;
+		//float camZ = cos(glfwGetTime()) * 10.0f;
+
+		//view = glm::lookAt(glm::vec3(camX, 0.0f, camZ),
+		//				   glm::vec3(0.0f, 0.0f, 0.0f), 
+		//				   glm::vec3(0.0f, 1.0f, 0.0f));
+
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
@@ -255,7 +269,7 @@ int main(void)
 		//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		////============
-
+		gametime.DeltaTime_Update();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -278,8 +292,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void key_callback(GLFWwindow* window, int key, int scencode, int action, int mods)
 {
-	if (action == GLFW_PRESS)
-	{
+	float CameraSpeed = 5.0f;
+	
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE:
@@ -291,10 +305,24 @@ void key_callback(GLFWwindow* window, int key, int scencode, int action, int mod
 		case GLFW_KEY_DOWN:
 			mixValue -= 0.1f;
 			break;
+		//=====================
+		//Camera movement input
+		case GLFW_KEY_W:
+			cameraPos += CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			break;
+		case GLFW_KEY_S:
+			cameraPos -= CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			break;
+		case GLFW_KEY_A:
+			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			break;
+		case GLFW_KEY_D:
+			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			break;
+		//=====================
 		default:
 			cout << "Pressed default Key " << endl;
 			break;
-		}
 	}
 }
 

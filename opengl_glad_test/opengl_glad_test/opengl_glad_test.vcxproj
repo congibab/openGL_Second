@@ -143,6 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GameTime.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -150,6 +152,8 @@
     <ClCompile Include="stb_image.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="GameTime.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
