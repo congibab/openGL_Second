@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "GameTime.h"
+#include "Camera.h"
 
 using namespace std;
 
@@ -32,7 +33,10 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 GameTime gametime;
-
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMousse = true;
 
 int main(void)
 {
@@ -221,9 +225,10 @@ int main(void)
 		//				   glm::vec3(0.0f, 0.0f, 0.0f), 
 		//				   glm::vec3(0.0f, 1.0f, 0.0f));
 
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		//view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		view = camera.GetViewMatrix();
 
-		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		int modelLoc = glGetUniformLocation(MVP_Shader.ID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -294,6 +299,7 @@ void key_callback(GLFWwindow* window, int key, int scencode, int action, int mod
 {
 	float CameraSpeed = 5.0f;
 	
+	cout << camera.Position.x << "," << camera.Position.y << "," << camera.Position.z << endl;
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE:
@@ -308,44 +314,65 @@ void key_callback(GLFWwindow* window, int key, int scencode, int action, int mod
 		//=====================
 		//Camera movement input
 		case GLFW_KEY_W:
-			cameraPos += CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			//cameraPos += CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			camera.ProcessKeyboard(FRORWARD, gametime.GetDeltaTime());
 			break;
 		case GLFW_KEY_S:
-			cameraPos -= CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			//cameraPos -= CameraSpeed * cameraFront * gametime.GetDeltaTime();
+			camera.ProcessKeyboard(BACKWORD, gametime.GetDeltaTime());
 			break;
 		case GLFW_KEY_A:
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			//cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			camera.ProcessKeyboard(LEFT, gametime.GetDeltaTime());
 			break;
 		case GLFW_KEY_D:
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			//cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * CameraSpeed * gametime.GetDeltaTime();
+			camera.ProcessKeyboard(RIGHT, gametime.GetDeltaTime());
 			break;
 		//=====================
 		default:
 			cout << "Pressed default Key " << endl;
 			break;
-	}
+		}
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	cout<< "Mouse Position (" << xpos << "," << ypos << ")" << endl;
+	if (firstMousse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMousse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	zoom += yoffset;
-	cout << "Mouse Scroll Offset (" << xoffset << "," << yoffset << ")" << endl;
+	//zoom += yoffset;
+	camera.ProcessMouseScroll(yoffset);
+	//cout << "Mouse Scroll Offset (" << xoffset << "," << yoffset << ")" << endl;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-	{
-		cout << "Mouse Clicked right button" << endl;
-	}
+	//if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	//{
+	//	cout << "Mouse Clicked right button" << endl;
+	//}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-	{
-		cout << "Mouse Clicked right left" << endl;
-	}
+	//if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	//{
+	//	cout << "Mouse Clicked right left" << endl;
+	//}
+
+
 }
